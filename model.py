@@ -8,19 +8,26 @@ from sklearn.metrics import r2_score
 
 attendance_data = pd.read_csv("data/dataset.csv")
 
-X = attendance_data[attendance_data['Semester'] == 1]['SemOffset']
-y = attendance_data[attendance_data['Semester'] == 1]['PastAttendance']
+X = attendance_data[['Semester', 'SemOffset']]
+y = attendance_data['PastAttendance']
 
-# X vs ln(y) looks to be pretty linear
-
-X = pd.DataFrame(X)
-y = pd.DataFrame(np.log(y))
-
+# Create and fit model on X vs. ln(y)
 model = LinearRegression()
-model.fit(X, y)
+model.fit(X, np.log(y))
 
-print(r2_score(y, model.predict(X)))
+# Display r-squared
+print(f'R-squared: {r2_score(y, model.predict(X))}')
 
-plt.scatter(X, np.exp(y))
-plt.plot(X, np.exp(model.predict(X)))
+# Form results dataframe
+results = X.join(pd.DataFrame(model.predict(X))).set_axis(['Semester', 'SemOffset', 'AttendanceBar'], axis=1)
+results['AttendanceBar'] = np.exp(results['AttendanceBar'])
+
+# Plot fall semester values and predictions
+plt.scatter(attendance_data[attendance_data['Semester'] == 0]['SemOffset'], attendance_data[attendance_data['Semester'] == 0]['PastAttendance'])
+plt.plot(results[results['Semester'] == 0]['SemOffset'], results[results['Semester'] == 0]['AttendanceBar'])
+
+# Plot spring semester values and predictionss
+plt.scatter(attendance_data[attendance_data['Semester'] == 1]['SemOffset'], attendance_data[attendance_data['Semester'] == 1]['PastAttendance'])
+plt.plot(results[results['Semester'] == 1]['SemOffset'], results[results['Semester'] == 1]['AttendanceBar'])
+
 plt.show()
