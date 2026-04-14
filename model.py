@@ -14,7 +14,7 @@ model = LinearRegression()
 model.fit(X, np.log(y))
 
 # Display r-squared
-print(f'R-squared: {r2_score(y, model.predict(X))}')
+print(f'R-squared: {r2_score(np.log(y), model.predict(X))}')
 
 # Form results dataframe
 results = X.join(pd.DataFrame(model.predict(X))).set_axis(['Semester', 'SemOffset', 'AttendanceBar'], axis=1)
